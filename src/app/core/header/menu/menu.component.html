@@ -1,0 +1,31 @@
+<div class="pcoded-inner-navbar main-menu" appAccordion>
+  <div slimScroll width="100%" height="calc(100% - 80px)" size="4px" color="#fff" opacity="0.3" allowPageScroll="false">
+    <div class="d-color">
+
+      <ul class="pcoded-item pcoded-left-item" [attr.item-border]="itemBorder" [attr.item-border-style]="itemBorderStyle" [attr.subitem-border]="subItemBorder"
+        *ngFor="let asideItem of (menuState | async)?.menuList" appAccordionLink group="{{asideItem.MenuState}}">
+        <li [routerLinkActive]="['active']" *ngIf="asideItem.MenuType === 'link'" appAccordionLink group="{{asideItem.MenuState}}">
+          <a [routerLink]="['/', asideItem.main_state, asideItem.state]" target="{{asideItem.target ? '_blank' : '_self'}}" appAccordionToggle
+            *ngIf="asideItem.main_state; else mainContent">
+            <span class="pcoded-micon">
+              <i class="{{ asideItem.Icon }}"></i>
+              <b>{{ asideItem.ShortLabel }}</b>
+            </span>
+            <span class="pcoded-mtext"> {{ asideItem.Name | translate}}</span>
+            <span class="pcoded-mcaret"></span>
+          </a>
+          <ng-template #mainContent>
+            <a [routerLink]="['/', asideItem.MenuState]" target="{{asideItem.MenuTarget ? '_blank' : '_self'}}" appAccordionToggle>
+              <span class="pcoded-micon">
+                <i class="{{ asideItem.Icon }}"></i>
+                <b>{{ asideItem.ShortLabel }}</b>
+              </span>
+              <span class="pcoded-mtext">{{ asideItem.Name | translate }}</span>
+              <span class="pcoded-mcaret"></span>
+            </a>
+          </ng-template>
+        </li>
+      </ul>
+    </div>
+  </div>
+</div>

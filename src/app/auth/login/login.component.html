@@ -1,0 +1,35 @@
+<div class="center">
+  <form [formGroup]="loginForm" (ngSubmit)="onSubmit()">
+    <div class="login-container">
+      <div id="errMsgdiv" *ngIf="(authState | async)?.errorMessage && isErrorMessageVisible">
+        <div class="alert alert-danger" role="alert">
+          <strong>{{ (authState | async)?.errorMessage }}</strong>
+        </div>
+      </div>
+
+      <div class="inputGroup inputGroup1">
+        <input type="email" id="email" class="form-control" formControlName="email" placeholder="{{'login.username' | translate}}"
+          autofocus (change)="onTextChange()">
+        <div class="col-sm-12" *ngIf="!loginForm.get('email').valid && loginForm.get('email').dirty">
+          <small class="text-danger">
+            Please Enter a valid email address !
+          </small>
+        </div>
+        <span class="indicator"></span>
+      </div>
+      <div class="inputGroup inputGroup2">
+        <input type="password" class="form-control" id="password" formControlName="password" placeholder="{{'login.password' | translate}}"
+          autofocus (change)="onTextChange()" />
+        <div class="col-sm-12" *ngIf="!loginForm.get('password').valid && loginForm.get('password').dirty">
+          <small class="text-danger">
+            Please Enter a valid password !
+          </small>
+        </div>
+      </div>
+      <div class="inputGroup inputGroup3">
+        <button id="login" type="submit" [disabled]="!loginForm.valid">{{ 'login.login-button' | translate }}</button>
+      </div>
+    </div>
+  </form>
+</div>
+<app-spinner *ngIf="isLoading"></app-spinner>

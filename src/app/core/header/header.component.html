@@ -1,0 +1,69 @@
+<div class="pcoded" [attr.nav-type]="navType" [attr.theme-layout]="themeLayout" [attr.layout-type]="layoutType" [attr.vertical-placement]="verticalPlacement"
+  [attr.vertical-layout]="verticalLayout" [attr.pcoded-device-type]="deviceType" [attr.vertical-nav-type]="verticalNavType"
+  [attr.vertical-effect]="verticalEffect" [attr.vnavigation-view]="vNavigationView" (window:resize)="onResize($event)">
+  <div class="pcoded-overlay-box"></div>
+  <div class="pcoded-container navbar-wrapper">
+    <nav class="navbar header-navbar pcoded-header" [attr.pcoded-header-position]="pcodedHeaderPosition" [attr.header-theme]="headerTheme">
+      <div class="navbar-wrapper">
+        <div class="navbar-logo" [attr.logo-theme]="logoTheme">
+          <a class="mobile-menu" id="mobile-collapse" href="javascript:;" (click)="toggleOpened()" (clickOutside)="onClickedOutside($event)">
+            <i class="fas fa-bars"></i>
+          </a>     
+          <a (click)="onMobileMenu()" class="mobile-options">
+            <i class="ti-more"></i>
+          </a>
+        </div>
+        <div class="navbar-container">
+          <div>
+            <ul [@mobileMenuTop]="isCollapsedMobile" class="nav-right" [ngClass]="isCollapsedMobile">          
+              <li class="user-profile header-notification">
+                <a>
+                  <img src="assets/images/avatar-4.jpg" class="img-radius" alt="User-Profile-Image">
+                  <span>{{ (authState | async).token?.fullName }}</span>
+                  <i class="ti-angle-down"></i>
+                </a>
+                <ul class="show-notification profile-notification">            
+                  <li>
+                    <a class="profile-menu" (click)="onLogout()">
+                      <i class="fas fa-sign-out-alt"></i> {{'header.logout' | translate}}
+                    </a>
+                  </li>
+                </ul>
+              </li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </nav>
+
+    <div class="pcoded-main-container" [style.margin-top]="headerFixedMargin">
+      <div class="pcoded-wrapper">
+        <nav id="main_navbar" class=" pcoded-navbar" (clickOutside)="onClickedOutside($event)" [attr.pcoded-header-position]="pcodedHeaderPosition"
+          [attr.navbar-theme]="navBarTheme" [attr.active-item-theme]="activeItemTheme" sub-item-theme="theme2" active-item-style="style0"
+          [attr.pcoded-navbar-position]="pcodedSidebarPosition">
+          <div class="sidebar_toggle">
+            <a href="javascript:;">
+              <i class="icon-close icons"></i>
+            </a>
+          </div>
+          <app-menu>
+          </app-menu>
+        </nav>
+        <div class="pcoded-content">
+          <div class="pcoded-inner-content">
+            <div class="main-body">
+              <div class="page-wrapper">
+                <div class="page-body">
+                  <router-outlet>
+                    <app-spinner *ngIf='!(authState | async).token?.fullName'></app-spinner>
+                  </router-outlet>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>

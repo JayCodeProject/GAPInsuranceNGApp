@@ -1,0 +1,353 @@
+<div class="panel">
+  <div class="row">
+    <div class="col table-responsive">
+      <div class="row">
+        <div class="col-8">
+          <div id="input-search" class="input-group col-md-4">
+            <input class="form-control py-2 border-right-0 border" type="search" placeholder="Search Insurance.." name="search"
+              [(ngModel)]="filter">
+            <span class="input-group-append">
+              <div class="input-group-text bg-transparent">
+                <i class="fa fa-search"></i>
+              </div>
+            </span>
+          </div>
+        </div>
+        <div class="col-4">
+          <div class="keep-right">
+            <button class="btn btn-light-blue" data-toggle="modal" data-target="#newProductModal" (click)="onAddNewproductClick()">Add
+              Insurance</button>
+          </div>
+        </div>
+      </div>
+      <div class="table-responsive">
+        <table class="table table-hover" id="product-table">
+          <thead class="thead-dark">
+            <th>{{ 'product.tblItemNumber' | translate }}
+            </th>
+            <th (click)="sort('Name')">{{ 'product.tblName' | translate }}
+              <i class="fas fa-sort"></i>
+            </th>
+            <th (click)="sort('Price')">{{ 'product.tblPrice' | translate }}
+              <i class="fas fa-sort"></i>
+            </th>
+            <th (click)="sort('ValidDate')">Valid Date
+              <i class="fas fa-sort"></i>
+            </th>
+            <th (click)="sort('RiskLevel')">Risk Level
+              <i class="fas fa-sort"></i>
+            </th>
+            <th (click)="sort('Coverage')">Coverage
+              <i class="fas fa-sort"></i>
+            </th>
+            <th (click)="sort('CovPeriod')">Coverage Period
+              <i class="fas fa-sort"></i>
+            </th>
+            <th>{{ 'product.tblAction' | translate }}</th>
+          </thead>
+          <tbody>
+            <tr *ngFor="let item of (insuranceState | async)?.insuranceList | orderBy: key : reverse | filter:filter | paginate: { itemsPerPage: 12, currentPage: p }; let i = index">
+              <td>{{ item.Id }}</td>
+              <td>{{ item.Name }}</td>
+              <td>{{ item.Price }}</td>
+              <td>{{ item.ValidDate | date: 'dd/MM/yyyy' }} </td>
+              <td>{{ item.RiskLevel }}</td>
+              <td>{{ item.Coverage }}</td>
+              <td>{{ item.CovPeriod }}</td>
+              <td>
+                <i id="detail-icon" class="fas fa-info-circle" data-toggle="modal" data-target="#insuranceClientModal"
+                  (click)="loadCustomerInsurance(item)"></i>
+                <i id="client-icon" class="fas fa-user-plus" data-toggle="modal" data-target="#clientModal" (click)="getCustomer(item)"></i>
+                <i id="edit-icon" class="fas fa-edit" data-toggle="modal" data-target="#editProductModal" (click)="editInsurance(item)"></i>
+                <i id="delete-icon" class="fas fa-times-circle" (click)="deleteInsurance(item)"></i>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="center">
+        <pagination-controls (pageChange)="p = $event"></pagination-controls>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!--New Product Modal -->
+<div class="modal fade" id="newProductModal" tabindex="-1" role="dialog" aria-labelledby="newProductModalTitle"
+  aria-hidden="true" data-keyboard="false" data-backdrop="static">
+  <div class="modal-dialog modal-dialog-centered" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="newProductModalLongTitle">Add new Insurance</h5>
+      </div>
+      <div class="modal-body">
+        <div class="row">
+          <div class="col">
+
+            <form [formGroup]="productForm" (ngSubmit)="addNewInsurance()">
+              <div class="form-group">
+                <select class="dropdown-product btn-default" formControlName="riskLevelCatalog" autofocus>
+                  <option *ngFor="let catalog of (insuranceState | async)?.riskLevelList" [value]="catalog.Id">
+                    {{ catalog.Name }}
+                  </option>
+                </select>
+              </div>
+
+              <div class="form-group">
+                <select class="dropdown-product btn-default" formControlName="coverageCatalog" autofocus>
+                  <option *ngFor="let covCatalog of (insuranceState | async)?.coverageList" [value]="covCatalog.Id">
+                    {{ covCatalog.Name }}
+                  </option>
+                </select>
+              </div>
+
+              <div class="form-group">
+                <input type="text" class="form-control" formControlName="name" id="name" aria-describedby="emailHelp"
+                  placeholder="Insurance Name">
+                <div class="col-sm-12" *ngIf="!productForm.get('name').valid && productForm.get('name').touched">
+                  <small class="text-danger">
+                    Please enter insurance name !
+                  </small>
+                </div>
+              </div>
+
+              <div class="form-group">
+                <input type="number" class="form-control" formControlName="price" id="price" aria-describedby="barCodeHelp"
+                  placeholder="Price">
+                <div class="col-sm-12" *ngIf="!productForm.get('price').valid && productForm.get('price').touched">
+                  <small class="text-danger">
+                    The price cannot be null !
+                  </small>
+                </div>
+              </div>
+
+              <div class="form-group">
+                <input type="date" class="form-control" formControlName="validDate" id="validDate" placeholder="Valid Date">
+                <div class="col-sm-12" *ngIf="!productForm.get('validDate').valid && productForm.get('validDate').touched">
+                  <small class="text-danger">
+                    The Valid Date cannot be null !
+                  </small>
+                </div>
+              </div>
+
+              <div class="form-group">
+                <input type="number" class="form-control" step="1" min="1" formControlName="coveragePeriod" id="coveragePeriod"
+                  placeholder="Coverage Period (Month)">
+                <div class="col-sm-12" *ngIf="!productForm.get('coveragePeriod').valid && productForm.get('coveragePeriod').touched">
+                  <small class="text-danger">
+                    The Coverage period cannot be null !
+                  </small>
+                </div>
+              </div>
+
+              <div class="center">
+                <button class="btn btn-default" data-dismiss="modal" aria-hidden="true">{{ 'product.modalBtnClose' |
+                  translate
+                  }}
+                </button>
+                <button type="submit" class="btn btn-light-blue" [disabled]="!productForm.valid" data-target="#successModal"
+                  data-toggle="modal">{{
+                  'product.modalBtnAdd' | translate }}</button>
+              </div>
+            </form>
+
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+
+<!--Edit Product Modal -->
+<div class="modal fade" id="editProductModal" tabindex="-1" role="dialog" aria-labelledby="editProductModalTitle"
+  aria-hidden="true" data-keyboard="false" data-backdrop="static" *ngIf="selectedInsurance">
+  <div class="modal-dialog modal-dialog-centered" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="editProductModalLongTitle">Edit Insurance</h5>
+      </div>
+      <div class="modal-body">
+        <div class="row">
+          <div class="col">
+
+            <form [formGroup]="productForm" (ngSubmit)="saveEditedInsurance()">
+              <div class="form-group">
+                <select class="dropdown-product btn-default" formControlName="riskLevelCatalog">
+                  <option *ngFor="let catalog of (insuranceState | async)?.riskLevelList" [ngValue]="catalog.Id">
+                    {{ catalog.Name }}
+                  </option>
+                </select>
+              </div>
+
+              <div class="form-group">
+                <select class="dropdown-product btn-default" formControlName="coverageCatalog">
+                  <option *ngFor="let covCatalog of (insuranceState | async)?.coverageList" [ngValue]="covCatalog.Id">
+                    {{ covCatalog.Name }}
+                  </option>
+                </select>
+              </div>
+
+              <div class="form-group">
+                <input type="text" class="form-control" formControlName="name" id="name" aria-describedby="emailHelp"
+                  placeholder="Insurance Name">
+                <div class="col-sm-12" *ngIf="!productForm.get('name').valid && productForm.get('name').touched">
+                  <small class="text-danger">
+                    Please enter insurance name !
+                  </small>
+                </div>
+              </div>
+
+              <div class="form-group">
+                <input type="number" class="form-control" formControlName="price" id="price" aria-describedby="barCodeHelp"
+                  placeholder="Price">
+                <div class="col-sm-12" *ngIf="!productForm.get('price').valid && productForm.get('price').touched">
+                  <small class="text-danger">
+                    The price cannot be null !
+                  </small>
+                </div>
+              </div>
+
+              <div class="form-group">
+                <input type="text" class="form-control" formControlName="validDate" id="validDate" placeholder="Valid Date">
+                <div class="col-sm-12" *ngIf="!productForm.get('validDate').valid && productForm.get('validDate').touched">
+                  <small class="text-danger">
+                    The Valid Date cannot be null !
+                  </small>
+                </div>
+              </div>
+
+              <div class="form-group">
+                <input type="number" class="form-control" step="1" min="1" formControlName="coveragePeriod" id="coveragePeriod"
+                  placeholder="Coverage Period (Month)">
+                <div class="col-sm-12" *ngIf="!productForm.get('coveragePeriod').valid && productForm.get('coveragePeriod').touched">
+                  <small class="text-danger">
+                    The Coverage period cannot be null !
+                  </small>
+                </div>
+              </div>
+
+              <div class="center">
+                <button class="btn btn-default" data-dismiss="modal" aria-hidden="true" (click)="resetForm(productForm)">{{
+                  'product.modalBtnClose' |
+                  translate
+                  }}
+                </button>
+                <button type="submit" class="btn btn-light-blue" [disabled]="!productForm.valid" data-target="#successModal"
+                  data-toggle="modal">Save</button>
+              </div>
+            </form>
+
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!--ASSOCIATE INS Modal -->
+<form [formGroup]="customerForm">
+  <div class="modal fade" id="clientModal" tabindex="-1" role="dialog" aria-labelledby="clientModalTitle" aria-hidden="true"
+    data-keyboard="false" data-backdrop="static">
+    <div class="modal-dialog modal-dialog-centered" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="clientModalLongTitle">Add insurance to client</h5>
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close" (click)="resetForm(customerForm)">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+        <div class="modal-body">
+          <div class="row">
+            <div class="col">
+              <div class="form-group">
+                <div>
+                  <select class="dropdown-product btn-default" formControlName="customer">
+                    <option *ngFor="let customer of (insuranceState | async)?.customerList" [ngValue]="customer.Id">
+                      {{ customer.FullName }}
+                    </option>
+                  </select>
+                </div>
+                <div class="form-group">
+                  <input type="number" class="form-control" min="10" max="100" step="10" formControlName="coverage" id="coverage"
+                    aria-describedby="barCodeHelp" placeholder="Coverage">
+                  <div class="col-sm-12" *ngIf="!customerForm.get('coverage').valid && customerForm.get('coverage').touched">
+                    <small class="text-danger">
+                      The coverage cannot be null !
+                    </small>
+                  </div>
+                </div>
+                <div class="center">
+                  <button type="submit" class="btn btn-light-blue" data-target="#successModal" data-toggle="modal"
+                    [disabled]="!customerForm.valid" (click)="associateIns()">Add</button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</form>
+
+
+<!--INS DETAIL Modal -->
+<div class="modal fade" id="insuranceClientModal" tabindex="-1" role="dialog" aria-labelledby="insuranceClientModalTitle"
+  aria-hidden="true" data-keyboard="false" data-backdrop="static">
+  <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="insuranceClientLongTitle">View all associated clients</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        <div class="row">
+          <div class="table-responsive">
+            <table class="table table-hover" id="customer-ins-table">
+              <thead>
+                <th>Id
+                </th>
+                <th>Identification
+                </th>
+                <th>Name
+                </th>
+                <th>Insurance
+                </th>
+                <th>Coverage (%)</th>
+                <th>Actions</th>
+              </thead>
+              <tbody>
+                <tr *ngFor="let item of (insuranceState | async)?.customerInsList | orderBy: key : reverse | filter:filter | paginate: { itemsPerPage: 12, currentPage: p }; let i = index">
+                  <td>{{ item.Id }}</td>
+                  <td>{{ item.Identification }}</td>
+                  <td>{{ item.FullName }}</td>
+                  <td>{{ item.Insurance }}</td>
+                  <td>{{ item.Coverage }}</td>
+                  <td>
+                    <i id="delete-icon" class="fas fa-times-circle" (click)="deleteCustomerIns(item)"></i>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<div class="modal fade" id="successModal" role="alert">
+  <div class="modal-dialog modal-sm">
+    <div class="modal-content text-center">
+      <div class="modal-body" id="successModalBody">
+        <p>
+          {{ (insuranceState | async)?.response?.ResponseMsg }}
+        </p>
+      </div>
+    </div>
+  </div>
+</div>
